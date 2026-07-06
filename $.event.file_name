@@ -1,16 +1,26 @@
-- name: Update keycloak-services on Ubuntu
-  hosts: ubuntu_servers
+- name: Update system to version 1.7.0
+  hosts: redhat9_servers
   become: yes
   tasks:
-    - name: Update keycloak-services to version 22.0.13
-      apt:
-        name: keycloak-services
-        version: 22.0.13
-        state: present
-      when: ansible_distribution_major_version == "20"
+    - name: Check current version of the system
+      shell: rpm -q <package_name>
+      register: current_version
 
-    - name: Ensure keycloak-services is installed
-      apt:
-        name: keycloak-services
+    - name: Parse current version number
+      set_fact:
+        current_version_number: "{{ current_version.stdout.split('=')[1].strip() }}"
+
+    - name: Check if version is lower than 1.7.0
+      assert:
+        that:
+          - current_version_number | version_compare("1.7.0", "lt")
+
+    - name: Download update package for version 1.7.0
+      get_url:
+        url: "https://official-source-or-repository.com/path/to/update-package-1.7.0.rpm"
+        dest: "/tmp/update-package-1.7.0.rpm"
+
+    - name: Install the update package
+      rpm:
+        name: /tmp/update-package-1.7.0.rpm
         state: present
-      when: ansible_distribution_major_version == "20"
