@@ -1,0 +1,43 @@
+- name: Upgrade Ubuntu System to Version 1.4.22
+  hosts: ubuntu_servers
+  become: yes
+  tasks:
+    - name: Check current Ubuntu version
+      shell: lsb_release -a
+      register: current_version
+
+    - name: Display current Ubuntu version
+      debug:
+        var: current_version.stdout
+
+    - name: Update package list
+      apt:
+        update_cache: yes
+
+    - name: Upgrade the system
+      apt:
+        upgrade: yes
+        changes: yes
+
+    - name: Download version 1.4.22 of the software
+      get_url:
+        url: http://example.com/software/1.4.22.deb
+        dest: /tmp/software-1.4.22.deb
+
+    - name: Install the new version of the software
+      command: dpkg -i /tmp/software-1.4.22.deb
+
+    - name: Verify installation
+      shell: lsb_release -a
+      register: new_version
+
+    - name: Display new Ubuntu version
+      debug:
+        var: new_version.stdout
+
+    - name: Ensure version has been upgraded
+      assert:
+        that:
+          - "'Ubuntu 1.4.22' in new_version.stdout"
+        fail_msg: "Version upgrade failed, expected 'Ubuntu 1.4.22' but got {{ new_version.stdout }}"
+        success_msg: "Successfully upgraded to Ubuntu 1.4.22"
