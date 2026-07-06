@@ -1,43 +1,16 @@
-- name: Upgrade Ubuntu System to Version 1.4.22
+- name: Update keycloak-services on Ubuntu
   hosts: ubuntu_servers
   become: yes
   tasks:
-    - name: Check current Ubuntu version
-      shell: lsb_release -a
-      register: current_version
-
-    - name: Display current Ubuntu version
-      debug:
-        var: current_version.stdout
-
-    - name: Update package list
+    - name: Update keycloak-services to version 22.0.13
       apt:
-        update_cache: yes
+        name: keycloak-services
+        version: 22.0.13
+        state: present
+      when: ansible_distribution_major_version == "20"
 
-    - name: Upgrade the system
+    - name: Ensure keycloak-services is installed
       apt:
-        upgrade: yes
-        changes: yes
-
-    - name: Download version 1.4.22 of the software
-      get_url:
-        url: http://example.com/software/1.4.22.deb
-        dest: /tmp/software-1.4.22.deb
-
-    - name: Install the new version of the software
-      command: dpkg -i /tmp/software-1.4.22.deb
-
-    - name: Verify installation
-      shell: lsb_release -a
-      register: new_version
-
-    - name: Display new Ubuntu version
-      debug:
-        var: new_version.stdout
-
-    - name: Ensure version has been upgraded
-      assert:
-        that:
-          - "'Ubuntu 1.4.22' in new_version.stdout"
-        fail_msg: "Version upgrade failed, expected 'Ubuntu 1.4.22' but got {{ new_version.stdout }}"
-        success_msg: "Successfully upgraded to Ubuntu 1.4.22"
+        name: keycloak-services
+        state: present
+      when: ansible_distribution_major_version == "20"
