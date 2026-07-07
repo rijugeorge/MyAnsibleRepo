@@ -1,0 +1,14 @@
+- name: Automate target core configuration
+  hosts: linux_servers
+  become: yes
+  tasks:
+    - name: Navigate to the target core directory
+      shell: cd /sys/kernel/config/target/core
+      args:
+        chdir: /sys/kernel/config/target/core
+
+    - name: Disable XCOPY support
+      shell: echo 0 > /sys/kernel/config/target/core/{{ backstore }}/{{ name }}/attrib/emulate_3pc
+      vars:
+        backstore: 'your_backstore_value'
+        name: 'your_name_value'
