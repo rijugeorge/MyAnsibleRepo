@@ -7,3 +7,7 @@
    - name: Print message
      ansible.builtin.debug:
       msg: Hello world
+      
+   - name: Force this play to fail
+      ansible.builtin.fail:
+        msg: "This playbook is intentionally set to fail."
