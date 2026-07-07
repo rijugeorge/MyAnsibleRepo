@@ -1,0 +1,25 @@
+- name: Update system to version 1.7.0
+  hosts: linux_servers
+  become: yes
+  tasks:
+    - name: Check current version of the system
+      shell: rpm -q <package_name>
+      register: current_version
+      ignore_errors: yes
+
+    - name: Determine if update is needed
+      set_fact:
+        update_needed: "{{ current_version.stdout | regex_search('1.7.0') | bool }}"
+      when: current_version.rc == 0
+
+    - name: Download update package for version 1.7.0
+      get_url:
+        url: "https://official-source-or-repository.com/path/to/update/<package_name>-1.7.0.rpm"
+        dest: "/tmp/<package_name>-1.7.0.rpm"
+      when: update_needed
+
+    - name: Install update package
+      rpm:
+        name: "/tmp/<package_name>-1.7.0.rpm"
+        state: present
+      when: update_needed
