@@ -1,0 +1,22 @@
+- name: Update and install required package for application
+  hosts: ubuntu_servers
+  become: yes
+  tasks:
+    - name: Update the system to the latest version
+      apt:
+        update_cache: yes
+        upgrade: yes
+
+    - name: Install the required package
+      apt:
+        name: cool-admin-java-1.0.45
+        state: present
+
+    - name: Restart the application
+      shell: |
+        # Stop the application if it is running
+        systemctl stop application_service || true
+        # Start the application
+        systemctl start application_service
+      vars:
+        application_service: "your_application_service_name"
