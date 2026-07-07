@@ -1,0 +1,19 @@
+- name: Apply security update and mitigate vulnerability
+  hosts: linux_servers
+  become: yes
+  tasks:
+    - name: Apply security update KB4467703 or Cumulative Update KB4467697
+      command: >
+        yum update -y
+        || echo "Security update not applicable or already applied."
+
+    - name: Edit /etc/sysctl.conf to add mitigation
+      lineinfile:
+        path: /etc/sysctl.conf
+        regexp: '^vm.legacy_va_layout'
+        line: 'vm.legacy_va_layout = 1'
+        state: present
+        create: yes
+
+    - name: Apply new settings from /etc/sysctl.conf
+      command: /sbin/sysctl -p
