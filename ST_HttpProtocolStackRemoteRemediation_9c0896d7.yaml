@@ -1,0 +1,19 @@
+- name: Install security updates on Windows Server 2012
+  hosts: windows_servers
+  gather_facts: no
+  tasks:
+    - name: Download security updates
+      win_command: "Invoke-WebRequest -Uri 'https://example.com/security_updates.exe' -OutFile 'C:\\security_updates.exe'"
+      register: download_result
+
+    - name: Install security updates
+      win_command: "C:\\security_updates.exe /quiet /norestart"
+      when: download_result is succeeded
+
+    - name: Verify installation
+      win_shell: "Get-HotFix | Select-Object -Property HotFixID, Description, InstalledOn"
+      register: install_result
+
+    - name: Display installation details
+      debug:
+        var: install_result.stdout_lines
