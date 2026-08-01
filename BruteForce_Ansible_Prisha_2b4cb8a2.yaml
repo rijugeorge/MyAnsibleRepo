@@ -1,0 +1,20 @@
+- name: Upgrade OpenSSH packages and configure SSH login grace time
+  hosts: redhat_servers
+  become: yes
+  tasks:
+    - name: Upgrade OpenSSH packages
+      dnf:
+        name: openssh-server
+        state: latest
+
+    - name: Set LoginGraceTime to 0 in /etc/ssh/sshd_config
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^LoginGraceTime'
+        line: 'LoginGraceTime 0'
+        state: present
+
+    - name: Restart sshd service
+      systemd:
+        name: sshd
+        state: restarted
