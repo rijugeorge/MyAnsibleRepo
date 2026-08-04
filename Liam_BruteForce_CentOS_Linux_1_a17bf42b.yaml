@@ -1,0 +1,34 @@
+- name: Update system to version 1.7.0
+  hosts: all
+  become: yes
+  tasks:
+    - name: Check current system version
+      shell: |
+        if command -v lsb_release &> /dev/null; then
+          version=$(lsb_release -a | grep "Release" | cut -d " " -f 3)
+        else
+          version=$(cat /etc/redhat-release | grep -oP 'release \K\d+')
+        fi
+        echo $version
+      register: system_version
+
+    - name: Determine if update is needed
+      set_fact:
+        update_needed: "{{ system_version.stdout | int >= 1.7.0 }}"
+      when: system_version.stdout is defined
+
+    - name: Skip update if current version is 1.7.0 or higher
+      skip_ansible_run: true
+      when: update_needed
+
+    - name: Download update file
+      get_url:
+        url: https://example.com/update/1.7.0/update_file.rpm
+        dest: /tmp/update_file.rpm
+      when: not update_needed
+
+    - name: Install update file
+      dnf:
+        name: /tmp/update_file.rpm
+        state: present
+      when: not update_needed
